@@ -1,0 +1,139 @@
+#!/bin/bash
+#
+# agen-audit - Query and inspect agent execution traces
+#
+# Reads JSONL logs from agen-log. Demonstrates the observability thesis.
+#
+# Usage:
+#   agen-audit --today
+#   agen-audit --agent data --event execution --today
+#   agen-audit --grep "prod" --today
+#
+set -euo pipefail
+
+VERSION="0.1.0"
+
+show_help() {
+  cat >&2 <<'EOF'
+agen-audit - Query agent execution traces
+
+USAGE
+  agen-audit [FILTERS] [OPTIONS]
+
+FILTERS (composable with AND logic)
+  --today             Events from today
+  --agent=NAME        Filter by agent name
+  --event=TYPE        Filter by event type
+  --grep=PATTERN      Search in message content
+  --after=DATE        Events after date (YYYY-MM-DD)
+  --before=DATE       Events before date (YYYY-MM-DD)
+
+OPTIONS
+  --format=FORMAT     Output format: pretty (default), json
+  --log-dir=PATH      Log directory (default: $AGEN_LOG_DIR or ./logs)
+  --help              Show this help
+  --version           Show version
+
+EXIT CODES
+  0   Results found
+  1   No results (or error)
+
+EXAMPLES
+  agen-audit --today
+  agen-audit --agent data --today --format json
+  agen-audit --today --event execution --grep "prod"
+EOF
+}
+
+die() { echo "agen-audit: $*" >&2; exit 1; }
+
+# Defaults
+AGENT=""
+EVENT=""
+GREP_PATTERN=""
+AFTER=""
+BEFORE=""
+FORMAT="pretty"
+LOG_DIR="${AGEN_LOG_DIR:-./logs}"
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --help) show_help; exit 0 ;;
+    --version) echo "agen-audit $VERSION"; exit 0 ;;
+    --today) AFTER="$(date +%Y-%m-%d)"; shift ;;
+    --agent=*) AGENT="${1#*=}"; shift ;;
+    --agent) AGENT="$2"; shift 2 ;;
+    --event=*) EVENT="${1#*=}"; shift ;;
+    --event) EVENT="$2"; shift 2 ;;
+    --grep=*) GREP_PATTERN="${1#*=}"; shift ;;
+    --grep) GREP_PATTERN="$2"; shift 2 ;;
+    --after=*) AFTER="${1#*=}"; shift ;;
+    --after) AFTER="$2"; shift 2 ;;
+    --before=*) BEFORE="${1#*=}"; shift ;;
+    --before) BEFORE="$2"; shift 2 ;;
+    --format=*) FORMAT="${1#*=}"; shift ;;
+    --format) FORMAT="$2"; shift 2 ;;
+    --log-dir=*) LOG_DIR="${1#*=}"; shift ;;
+    --log-dir) LOG_DIR="$2"; shift 2 ;;
+    --*) die "Unknown option: $1" ;;
+    *) die "Unexpected argument: $1" ;;
+  esac
+done
+
+# Determine which log file to read
+if [[ -n "$AGENT" ]]; then
+  LOG_FILE="$LOG_DIR/$AGENT.jsonl"
+else
+  LOG_FILE="$LOG_DIR/all.jsonl"
+fi
+
+[[ -f "$LOG_FILE" ]] || { echo "No logs found" >&2; exit 1; }
+
+# Build jq filter
+JQ_FILTER="."
+
+if [[ -n "$AGENT" ]]; then
+  JQ_FILTER="$JQ_FILTER | select(.agent == \"$AGENT\")"
+fi
+
+if [[ -n "$EVENT" ]]; then
+  JQ_FILTER="$JQ_FILTER | select(.event == \"$EVENT\")"
+fi
+
+if [[ -n "$AFTER" ]]; then
+  JQ_FILTER="$JQ_FILTER | select(.ts >= \"$AFTER\")"
+fi
+
+if [[ -n "$BEFORE" ]]; then
+  JQ_FILTER="$JQ_FILTER | select(.ts < \"$BEFORE\")"
+fi
+
+if [[ -n "$GREP_PATTERN" ]]; then
+  JQ_FILTER="$JQ_FILTER | select(.message | test(\"$GREP_PATTERN\"; \"i\"))"
+fi
+
+# Run query
+RESULTS=$(jq -c "$JQ_FILTER" "$LOG_FILE" 2>/dev/null || true)
+
+if [[ -z "$RESULTS" ]]; then
+  exit 1
+fi
+
+# Output based on format
+case "$FORMAT" in
+  json)
+    echo "$RESULTS"
+    ;;
+  pretty)
+    echo "$RESULTS" | jq -r '
+      "[" + (.ts | split("T")[1] | split("Z")[0] | .[0:8]) + "] " +
+      (.agent | . + " " * (8 - length)) + "| " +
+      (.event | . + " " * (10 - length)) + "| " +
+      .message
+    '
+    ;;
+  *)
+    die "Unknown format: $FORMAT (use: pretty, json)"
+    ;;
+esac
