@@ -181,6 +181,22 @@ while [[ $# -gt 0 ]]; do
 done
 
 # =============================================================================
+# VALIDATE DATE FORMATS
+# =============================================================================
+# ISO 8601 date string comparison only works if the format is correct.
+# Reject obviously wrong formats to prevent silent misbehavior.
+
+validate_date() {
+  local label="$1" value="$2"
+  if ! [[ "$value" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+    die "$label must be YYYY-MM-DD format: $value"
+  fi
+}
+
+[[ -n "$AFTER" ]] && validate_date "--after" "$AFTER"
+[[ -n "$BEFORE" ]] && validate_date "--before" "$BEFORE"
+
+# =============================================================================
 # DETERMINE WHICH LOG FILE TO READ
 # =============================================================================
 # If filtering by agent, read only that agent's log file (more efficient).
