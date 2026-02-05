@@ -2,11 +2,13 @@
 
 ## What Is This?
 
-**Plain English:** This program lets you ask questions about what your AI agents have been doing. "What did all agents do today?" "Did anything touch production?" "Show me every command the backup agent ran this week." It reads the log files that `agen-log` creates and gives you answers.
+`agen-audit` is to agent logs what `grep` is to text: a filter primitive. It reads the structured traces that `agen-log` produces and emits matching events to stdout. Part of the `agen-*` toolkit — small programs that compose via pipes and text streams to build larger agentic structures.
+
+**Why shell primitives?** The Unix philosophy — small tools that do one thing, work together via text streams, and remain inspectable — scales. The `agen-*` suite applies this to AI agents: instead of opaque frameworks, you get composable programs that work with `grep`, `jq`, `cron`, and everything else you already know.
 
 **Why does this exist?** You could just `grep` the log files directly (and you still can). But `agen-audit` makes common questions easier. It handles date filtering, combines multiple criteria, and formats output nicely. Think of it as a convenience layer — the power is still in the log files themselves.
 
-**The big picture:** This tool is the proof that shell-native AI agents are auditable. When someone asks "what did your AI agent do?", you don't have to trust the agent's self-report. You show them the execution trace. Every command, every decision, every timestamp — inspectable by anyone with Unix tools.
+**The big picture:** This tool is part of an argument that shell-native AI agents are auditable. When someone asks "what did your AI agent do?", you don't have to trust the agent's self-report. You show them the execution trace. Every command, every decision, every timestamp — inspectable by anyone with Unix tools.
 
 ---
 
