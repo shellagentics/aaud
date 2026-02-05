@@ -28,8 +28,6 @@ agen-audit [FILTERS...] [OPTIONS]
 
 All filters are composable using AND logic — specifying multiple filters narrows the results.
 
-This tool is part of the Shell Agentics toolkit, which implements AI agent systems using Unix primitives rather than frameworks or databases.
-
 ## FILTERS
 
 **--today**
