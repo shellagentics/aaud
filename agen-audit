@@ -193,8 +193,8 @@ validate_date() {
   fi
 }
 
-[[ -n "$AFTER" ]] && validate_date "--after" "$AFTER"
-[[ -n "$BEFORE" ]] && validate_date "--before" "$BEFORE"
+if [[ -n "$AFTER" ]]; then validate_date "--after" "$AFTER"; fi
+if [[ -n "$BEFORE" ]]; then validate_date "--before" "$BEFORE"; fi
 
 # =============================================================================
 # DETERMINE WHICH LOG FILE TO READ
