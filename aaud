@@ -1,10 +1,10 @@
 #!/bin/bash
 # =============================================================================
-# agen-audit — Query and inspect agent execution traces
+# aaud — Query and inspect agent execution traces
 # =============================================================================
 #
 # PURPOSE:
-#   Queries the JSONL log files created by agen-log. This tool demonstrates
+#   Queries the JSONL log files created by alog. This tool demonstrates
 #   the observability thesis: you can answer questions about what your AI
 #   agents did using standard Unix tools plus a thin convenience layer.
 #
@@ -15,9 +15,9 @@
 #   - Two output modes: human-readable (pretty) or machine-readable (json)
 #
 # EXAMPLES:
-#   agen-audit --today                           # What happened today?
-#   agen-audit --agent data --event execution    # What commands did data run?
-#   agen-audit --today --grep "error"            # Any errors today?
+#   aaud --today                           # What happened today?
+#   aaud --agent data --event execution    # What commands did data run?
+#   aaud --today --grep "error"            # Any errors today?
 #
 # WHY THIS EXISTS:
 #   The log files are simple enough that you never *need* this tool. But
@@ -38,10 +38,10 @@ VERSION="0.1.0"
 
 show_help() {
   cat >&2 <<'EOF'
-agen-audit - Query agent execution traces
+aaud - Query agent execution traces
 
 USAGE
-  agen-audit [FILTERS] [OPTIONS]
+  aaud [FILTERS] [OPTIONS]
 
 FILTERS (composable with AND logic)
   --today             Events from today
@@ -53,7 +53,7 @@ FILTERS (composable with AND logic)
 
 OPTIONS
   --format=FORMAT     Output format: pretty (default), json
-  --log-dir=PATH      Log directory (default: $AGEN_LOG_DIR or ./logs)
+  --log-dir=PATH      Log directory (default: $AGENT_LOG_DIR or ./logs)
   --help              Show this help
   --version           Show version
 
@@ -62,9 +62,9 @@ EXIT CODES
   1   No results (or error)
 
 EXAMPLES
-  agen-audit --today
-  agen-audit --agent data --today --format json
-  agen-audit --today --event execution --grep "prod"
+  aaud --today
+  aaud --agent data --today --format json
+  aaud --today --event execution --grep "prod"
 EOF
 }
 
@@ -72,7 +72,7 @@ EOF
 # UTILITY FUNCTIONS
 # =============================================================================
 
-die() { echo "agen-audit: $*" >&2; exit 1; }
+die() { echo "aaud: $*" >&2; exit 1; }
 
 # =============================================================================
 # DEFAULT VALUES
@@ -84,7 +84,7 @@ GREP_PATTERN=""    # Filter: message content must match this regex
 AFTER=""           # Filter: events on or after this date
 BEFORE=""          # Filter: events before this date
 FORMAT="pretty"    # Output format: pretty or json
-LOG_DIR="${AGEN_LOG_DIR:-./logs}"  # Where to read logs from
+LOG_DIR="${AGENT_LOG_DIR:-./logs}"  # Where to read logs from
 
 # =============================================================================
 # ARGUMENT PARSING
@@ -97,7 +97,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     --version)
-      echo "agen-audit $VERSION"
+      echo "aaud $VERSION"
       exit 0
       ;;
 
@@ -267,7 +267,7 @@ fi
 RESULTS=$(jq -c "$JQ_FILTER" "$LOG_FILE" 2>/dev/null || true)
 
 # If no results, exit with code 1
-# This enables conditional scripting: if agen-audit --today --grep "error"; then ...
+# This enables conditional scripting: if aaud --today --grep "error"; then ...
 if [[ -z "$RESULTS" ]]; then
   exit 1
 fi

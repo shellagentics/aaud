@@ -1,8 +1,8 @@
-# agen-audit
+# aaud
 
 ## What Is This?
 
-`agen-audit` is to agent logs what `grep` is to text: a filter primitive. It reads the structured traces that `agen-log` produces and emits matching events to stdout. You can `grep` the log files directly, but `agen-audit` makes common questions easier. It handles date filtering, combines multiple criteria, and formats output nicely. Think of it as a convenience layer — the power is still in the log files themselves.
+`aaud` is to agent logs what `grep` is to text: a filter primitive. It reads the structured traces that `alog` produces and emits matching events to stdout. You can `grep` the log files directly, but `aaud` makes common questions easier. It handles date filtering, combines multiple criteria, and formats output nicely. Think of it as a convenience layer — the power is still in the log files themselves.
 
 ## Shell Agentics
 
@@ -12,17 +12,17 @@ Part of the [Shell Agentics](https://github.com/shellagentics/shell-agentics) to
 
 ## NAME
 
-**agen-audit** — query and inspect agent execution traces
+**aaud** — query and inspect agent execution traces
 
 ## SYNOPSIS
 
 ```
-agen-audit [FILTERS...] [OPTIONS]
+aaud [FILTERS...] [OPTIONS]
 ```
 
 ## DESCRIPTION
 
-`agen-audit` queries the JSONL log files created by `agen-log`. It supports filtering by date, agent, event type, and message content. Results can be output in human-readable or JSON format.
+`aaud` queries the JSONL log files created by `alog`. It supports filtering by date, agent, event type, and message content. Results can be output in human-readable or JSON format.
 
 All filters are composable using AND logic — specifying multiple filters narrows the results.
 
@@ -54,7 +54,7 @@ All filters are composable using AND logic — specifying multiple filters narro
   - `json` — Raw JSONL passthrough
 
 **--log-dir**=*PATH*
-: Directory containing log files. Defaults to `$AGEN_LOG_DIR` environment variable, or `./logs` if not set.
+: Directory containing log files. Defaults to `$AGENT_LOG_DIR` environment variable, or `./logs` if not set.
 
 **--help**
 : Display usage information and exit.
@@ -85,7 +85,7 @@ Raw JSONL, suitable for piping to `jq` or other tools.
 
 ## ENVIRONMENT
 
-**AGEN_LOG_DIR**
+**AGENT_LOG_DIR**
 : Default directory containing log files. Overridden by `--log-dir`.
 
 ## EXIT STATUS
@@ -97,7 +97,7 @@ Raw JSONL, suitable for piping to `jq` or other tools.
 The exit code enables conditional scripting:
 
 ```bash
-if agen-audit --today --grep "error"; then
+if aaud --today --grep "error"; then
   echo "Errors detected today!"
 fi
 ```
@@ -107,57 +107,57 @@ fi
 **What did all agents do today?**
 
 ```bash
-agen-audit --today
+aaud --today
 ```
 
 **What did a specific agent do?**
 
 ```bash
-agen-audit --agent data --today
+aaud --agent data --today
 ```
 
 **What commands were executed?**
 
 ```bash
-agen-audit --event execution --today
+aaud --event execution --today
 ```
 
 **Did anything touch production?**
 
 ```bash
-agen-audit --today --grep "prod"
+aaud --today --grep "prod"
 ```
 
 **Combine filters (AND logic):**
 
 ```bash
 # Executions by the data agent that mention "backup"
-agen-audit --today --agent data --event execution --grep "backup"
+aaud --today --agent data --event execution --grep "backup"
 ```
 
 **Get raw JSON for processing:**
 
 ```bash
-agen-audit --today --format json | jq 'select(.exit_code != 0)'
+aaud --today --format json | jq 'select(.exit_code != 0)'
 ```
 
 **Date range queries:**
 
 ```bash
 # Events from a specific date range
-agen-audit --after 2024-01-10 --before 2024-01-15
+aaud --after 2024-01-10 --before 2024-01-15
 
 # Everything since Monday
-agen-audit --after 2024-01-15
+aaud --after 2024-01-15
 ```
 
 **Use in scripts:**
 
 ```bash
 # Alert if any errors occurred today
-if agen-audit --today --event error --format json | grep -q .; then
+if aaud --today --event error --format json | grep -q .; then
   echo "ALERT: Agents encountered errors today"
-  agen-audit --today --event error
+  aaud --today --event error
 fi
 ```
 
@@ -167,54 +167,54 @@ fi
 # What did each agent do today?
 for agent in data aurora lore; do
   echo "=== $agent ==="
-  agen-audit --today --agent $agent
+  aaud --today --agent $agent
 done
 ```
 
 ## FILES
 
-**$AGEN_LOG_DIR/all.jsonl**
+**$AGENT_LOG_DIR/all.jsonl**
 : Combined log file (used when no `--agent` filter is specified).
 
-**$AGEN_LOG_DIR/{agent}.jsonl**
+**$AGENT_LOG_DIR/{agent}.jsonl**
 : Per-agent log file (used when `--agent` filter is specified for efficiency).
 
 ## SEE ALSO
 
-`agen-log`(1) — create the log entries that agen-audit queries
+`alog`(1) — create the log entries that aaud queries
 
-`agen-memory`(1) — persistent key-value storage for agents
+`amem`(1) — persistent key-value storage for agents
 
 `jq`(1) — JSON processor for advanced queries
 
 ## WHEN TO USE AGEN-AUDIT VS. RAW TOOLS
 
-**Use agen-audit when:**
+**Use aaud when:**
 - You want quick answers to common questions
 - Date filtering would be tedious to write
 - You want pretty-printed output
 - You're exploring interactively
 
 **Use raw tools (grep, jq) when:**
-- You need complex queries agen-audit doesn't support
+- You need complex queries aaud doesn't support
 - You're building pipelines with other tools
 - You want full control over output format
-- agen-audit doesn't exist on the target system
+- aaud doesn't exist on the target system
 
 Example raw equivalents:
 
 ```bash
-# agen-audit --today --agent data
+# aaud --today --agent data
 grep "$(date +%Y-%m-%d)" logs/data.jsonl
 
-# agen-audit --event execution --format json
+# aaud --event execution --format json
 jq 'select(.event == "execution")' logs/all.jsonl
 
-# agen-audit --grep "backup"
+# aaud --grep "backup"
 grep -i "backup" logs/all.jsonl | jq .
 ```
 
-The log format is intentionally simple enough that you never *need* agen-audit. It's a convenience, not a requirement.
+The log format is intentionally simple enough that you never *need* aaud. It's a convenience, not a requirement.
 
 ## DESIGN NOTES
 
