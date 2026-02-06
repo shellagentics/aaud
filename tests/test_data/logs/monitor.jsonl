@@ -1,0 +1,4 @@
+{"ts":"2024-01-14T23:30:00Z","agent":"monitor","event":"request","message":"Check system health"}
+{"ts":"2024-01-15T08:15:00Z","agent":"monitor","event":"request","message":"Check disk usage on prod servers"}
+{"ts":"2024-01-15T08:15:02Z","agent":"monitor","event":"execution","message":"df -h /data /backup"}
+{"ts":"2024-01-15T08:15:03Z","agent":"monitor","event":"complete","message":"Disk usage nominal: /data 45%, /backup 72%"}

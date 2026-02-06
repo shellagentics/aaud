@@ -1,0 +1,6 @@
+{"ts":"2024-01-15T06:00:01Z","agent":"data","event":"request","message":"Verify backup integrity"}
+{"ts":"2024-01-15T06:00:03Z","agent":"data","event":"execution","message":"sha256sum /backup/2024-01-15/*"}
+{"ts":"2024-01-15T06:00:05Z","agent":"data","event":"complete","message":"Backup verified: 12 files, all checksums match"}
+{"ts":"2024-01-16T09:00:00Z","agent":"data","event":"request","message":"Run daily ETL pipeline"}
+{"ts":"2024-01-16T09:00:15Z","agent":"data","event":"execution","message":"python etl/run.py --date 2024-01-16"}
+{"ts":"2024-01-16T09:05:00Z","agent":"data","event":"complete","message":"ETL complete: 150k rows processed"}

@@ -1,0 +1,16 @@
+{"ts":"2024-01-14T23:30:00Z","agent":"monitor","event":"request","message":"Check system health"}
+{"ts":"2024-01-15T06:00:01Z","agent":"data","event":"request","message":"Verify backup integrity"}
+{"ts":"2024-01-15T06:00:03Z","agent":"data","event":"execution","message":"sha256sum /backup/2024-01-15/*"}
+{"ts":"2024-01-15T06:00:05Z","agent":"data","event":"complete","message":"Backup verified: 12 files, all checksums match"}
+{"ts":"2024-01-15T08:15:00Z","agent":"monitor","event":"request","message":"Check disk usage on prod servers"}
+{"ts":"2024-01-15T08:15:02Z","agent":"monitor","event":"execution","message":"df -h /data /backup"}
+{"ts":"2024-01-15T08:15:03Z","agent":"monitor","event":"complete","message":"Disk usage nominal: /data 45%, /backup 72%"}
+{"ts":"2024-01-15T12:00:00Z","agent":"deploy","event":"request","message":"Deploy v2.3.1 to staging"}
+{"ts":"2024-01-15T12:00:05Z","agent":"deploy","event":"execution","message":"kubectl apply -f staging.yaml"}
+{"ts":"2024-01-15T12:00:30Z","agent":"deploy","event":"error","message":"Deploy failed: image pull error on staging"}
+{"ts":"2024-01-15T14:00:00Z","agent":"deploy","event":"request","message":"Retry deploy v2.3.1 to staging"}
+{"ts":"2024-01-15T14:00:10Z","agent":"deploy","event":"execution","message":"kubectl apply -f staging.yaml"}
+{"ts":"2024-01-15T14:00:45Z","agent":"deploy","event":"complete","message":"Deploy successful: v2.3.1 running on staging"}
+{"ts":"2024-01-16T09:00:00Z","agent":"data","event":"request","message":"Run daily ETL pipeline"}
+{"ts":"2024-01-16T09:00:15Z","agent":"data","event":"execution","message":"python etl/run.py --date 2024-01-16"}
+{"ts":"2024-01-16T09:05:00Z","agent":"data","event":"complete","message":"ETL complete: 150k rows processed"}

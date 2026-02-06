@@ -1,0 +1,6 @@
+{"ts":"2024-01-15T12:00:00Z","agent":"deploy","event":"request","message":"Deploy v2.3.1 to staging"}
+{"ts":"2024-01-15T12:00:05Z","agent":"deploy","event":"execution","message":"kubectl apply -f staging.yaml"}
+{"ts":"2024-01-15T12:00:30Z","agent":"deploy","event":"error","message":"Deploy failed: image pull error on staging"}
+{"ts":"2024-01-15T14:00:00Z","agent":"deploy","event":"request","message":"Retry deploy v2.3.1 to staging"}
+{"ts":"2024-01-15T14:00:10Z","agent":"deploy","event":"execution","message":"kubectl apply -f staging.yaml"}
+{"ts":"2024-01-15T14:00:45Z","agent":"deploy","event":"complete","message":"Deploy successful: v2.3.1 running on staging"}
